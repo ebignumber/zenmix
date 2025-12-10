@@ -2,8 +2,9 @@
 
 **Focus better. Relax deeper. Build your perfect soundscape.**
 
-![ZenMix](https://github.com/user-attachments/assets/placeholder-screenshot.png)  
-_(Live demo: https://zenmix.live)_
+![ZenMix](https://github.com/user-attachments/assets/placeholder-screenshot.png)
+
+<!-- _(Live demo: https://zenmix.live)_ -->
 
 ## About
 
@@ -36,8 +37,6 @@ cd zenmix
 npm install
 npm run dev
 ```
-
-````
 
 Open http://localhost:5173 and start mixing.
 
@@ -81,12 +80,6 @@ src/hooks/               ← Custom hooks
 
 ## License
 
-MIT License — fork it, sell it, ship it, whatever.
+MIT License — fork it, ship it, whatever.
 
 Made with love (and a lot of coffee) — happy focusing!
-
-```
-
-Just replace `YOUR_USERNAME` (and the screenshot/live demo link when you have them) and you’re good to go. This README consistently gets hundreds of stars and easy contributions when used on ambient-sound projects.
-```
-````
