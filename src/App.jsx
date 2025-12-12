@@ -67,9 +67,9 @@ function App() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-10 font-sans">
+    <div className="min-h-screen bg-gray-900 text-white p-3 sm:p-5 md:p-10 font-sans">
       <header className="mb-10 text-center">
-        <h1 className="text-4xl font-bold mb-2 tracking-tight text-blue-100">
+        <h1 className="text-2xl md:text-4xl font-bold mb-2 tracking-tight text-blue-100">
           ZenMix
         </h1>
         <p className="text-gray-400">Mix your perfect soundscape.</p>
@@ -79,7 +79,7 @@ function App() {
       <PresetSelector onSelectPreset={handleSelectPreset} />
 
       {/* Grid */}
-      <main className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+      <main className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
         {sounds.map((sound) => {
           const state = getSoundState(sound.id);
           return (
