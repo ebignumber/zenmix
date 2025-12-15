@@ -9,7 +9,12 @@ function App() {
 
   // STATE: holds play status and volume for each sound
   // Format: { "rain": { isPlaying: false, volume: 0.5 }, "fire": ... }
-  const [soundStates, setSoundStates] = useState({});
+  const [soundStates, setSoundStates] = useState(() => {
+    const saved = localStorage.getItem("zenmix-state");
+    return saved ? JSON.parse(saved) : {};
+  });
+
+  useEffect(() => { localStorage.setItem("zenmix-state", JSON.stringify(soundStates)); }, [soundStates]);
   
   const {
     activeSounds,
