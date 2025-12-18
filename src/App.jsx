@@ -6,15 +6,37 @@ import { useActiveSounds } from "./hooks/useActiveSounds";
 
 function App() {
   const { sounds } = useSounds();
+  
+  const [hasSaveData, setHasSaveData] = useState(false)
+
+  const [hasResponded, setHasResponded] = useState(false)
 
   // STATE: holds play status and volume for each sound
   // Format: { "rain": { isPlaying: false, volume: 0.5 }, "fire": ... }
   const [soundStates, setSoundStates] = useState(() => {
     const saved = localStorage.getItem("zenmix-state");
-    return saved ? JSON.parse(saved) : {};
+    
+    //modifies the saved object from localStorage  
+    function modifyLastSave(){
+      saved.includes("true") ? setHasSaveData(true) : setHasSaveData(false)
+      const savedData = JSON.parse(saved)
+      const keys = Object.keys(savedData)
+      console.log(keys.length)
+      for (let i in keys){
+        if(savedData[keys[i]].isPlaying){
+          savedData[keys[i]].isPlaying = false
+        }
+        else{
+          delete savedData[keys[i]]
+        }
+      }
+      return savedData
+    }
+
+    return saved ? modifyLastSave() : {};
   });
 
-  useEffect(() => { localStorage.setItem("zenmix-state", JSON.stringify(soundStates)); }, [soundStates]);
+  useEffect(() => { localStorage.setItem("zenmix-state", JSON.stringify(soundStates));}, [soundStates]);
   
   const {
     activeSounds,
@@ -112,49 +134,67 @@ function App() {
     return () => window.removeEventListener("keydown", handleToggleActive);
   }, [activeSounds, toggleActiveSoundAll]);
 
+  function handleResume(){
+    setHasResponded(true)
+    for(let i in Object.keys(soundStates)){
+      soundStates[Object.keys(soundStates)[i]].isPlaying = true
+    }
+  }
 
   return (
-    <div className="min-h-screen bg-gray-900 text-white p-3 sm:p-5 md:p-10 font-sans">
-      <header className="mb-10 text-center">
-        <h1 className="text-2xl md:text-4xl font-bold mb-2 tracking-tight text-blue-100">
-          ZenMix
-        </h1>
-        <p className="text-gray-400">Mix your perfect soundscape.</p>
-      </header>
+    <>
+      {/* Banner For Saved Data */}
+      { hasSaveData && !hasResponded ? 
+          <dialog className="fixed flex justify-between top-* w-1/1 bg-gray-400">
+            <p className="pl-5">Resume Previous Session?</p>
+            <div className="w-1/8 flex justify-between">
+              <button className="hover:text-gray-500" onClick={handleResume}>Resume</button>
+              <button className="hover:text-gray-500" onClick={() => {setHasResponded(true)}}>Cancel</button>
+            </div>
+          </dialog> : ""}
 
-      {/* Search Bar */}
-        <div className="flex justify-center">
-          <input
-           placeholder="🔍 Search for sounds"
-           className="bg-white/10 hover:bg-white/20 rounded-2xl text-center w-2/5 h-8 mb-10"
-           onChange={(e) => {setSearch(e.target.value)}}
-          />
-        </div>
+      <div className="min-h-screen bg-gray-900 text-white p-3 sm:p-5 md:p-10 font-sans">
+        <header className="mb-10 text-center">
+          <h1 className="text-2xl md:text-4xl font-bold mb-2 tracking-tight text-blue-100">
+            ZenMix
+          </h1>
+          <p className="text-gray-400">Mix your perfect soundscape.</p>
+        </header>
+
+        {/* Search Bar */}
+          <div className="flex justify-center">
+            <input
+             placeholder="🔍 Search for sounds"
+             className="bg-white/10 hover:bg-white/20 rounded-2xl text-center w-2/5 h-8 mb-10"
+             onChange={(e) => {setSearch(e.target.value)}}
+            />
+          </div>
 
 
-      {/* Preset Selector */}
-      <PresetSelector setActiveSounds={setActiveSounds} onSelectPreset={handleSelectPreset} />
+        {/* Preset Selector */}
+        <PresetSelector setActiveSounds={setActiveSounds} onSelectPreset={handleSelectPreset} />
 
-      {/* Grid */}
-      <main className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
-        {sounds.map((sound) => {
-          const state = getSoundState(sound.id);
-          if(sound.label.toLowerCase().includes(search.toLowerCase())){
-            return (
-              <SoundCard
-                key={sound.id}
-                sound={sound}
-                // pass state and controls to child
-                isPlaying={state.isPlaying}
-                volume={state.volume}
-                onToggle={toggleSound}
-                onVolumeChange={changeVolume}
-              />
-            );
-          }
-        })}
-      </main>
-    </div>
+        {/* Grid */}
+        <main className="max-w-5xl mx-auto grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3 md:gap-6">
+          {sounds.map((sound) => {
+            const state = getSoundState(sound.id);
+            if(sound.label.toLowerCase().includes(search.toLowerCase())){
+              return (
+                <SoundCard
+                  key={sound.id}
+                  sound={sound}
+                  // pass state and controls to child
+                  isPlaying={state.isPlaying}
+                  volume={state.volume}
+                  onToggle={toggleSound}
+                  onVolumeChange={changeVolume}
+                />
+              );
+            }
+          })}
+        </main>
+      </div>
+    </>
   );
 }
 
