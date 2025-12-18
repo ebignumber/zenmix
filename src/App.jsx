@@ -144,14 +144,46 @@ function App() {
   return (
     <>
       {/* Banner For Saved Data */}
-      { hasSaveData && !hasResponded ? 
-          <dialog className="fixed flex justify-between top-* w-1/1 bg-gray-400">
-            <p className="pl-5">Resume Previous Session?</p>
-            <div className="w-1/8 flex justify-between">
-              <button className="hover:text-gray-500" onClick={handleResume}>Resume</button>
-              <button className="hover:text-gray-500" onClick={() => {setHasResponded(true)}}>Cancel</button>
+      {hasSaveData && !hasResponded && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <div
+            className="flex items-center gap-4 pl-6 pr-4 py-3 
+      bg-gray-800/95 backdrop-blur-md 
+      border border-blue-500/30 
+      rounded-full shadow-[0_0_20px_-5px_rgba(59,130,246,0.3)] 
+      ring-1 ring-white/10"
+          >
+            {/* Icon + Text Group */}
+            <div className="flex items-center gap-3">
+              <div className="flex items-center justify-center w-6 h-6 rounded-full bg-blue-500/20 text-blue-400">
+                <Play size={12} fill="currentColor" />
+              </div>
+              <span className="text-sm font-medium text-gray-100">
+                Resume session?
+              </span>
             </div>
-          </dialog> : ""}
+
+            {/* Vertical Divider */}
+            <div className="h-4 w-px bg-white/10" />
+
+            {/* Resume Button */}
+            <button
+              onClick={handleResume}
+              className="text-sm font-bold text-blue-400 hover:text-blue-300 transition-colors"
+            >
+              Resume
+            </button>
+
+            {/* Close (X) Button */}
+            <button
+              onClick={() => setHasResponded(true)}
+              className="p-1 ml-1 text-gray-500 hover:text-white hover:bg-white/10 rounded-full transition-all"
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
 
       <div className="min-h-screen bg-gray-900 text-white p-3 sm:p-5 md:p-10 font-sans">
         <header className="mb-10 text-center">
