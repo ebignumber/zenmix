@@ -21,7 +21,6 @@ function App() {
       saved.includes("true") ? setHasSaveData(true) : setHasSaveData(false)
       const savedData = JSON.parse(saved)
       const keys = Object.keys(savedData)
-      console.log(keys.length)
       for (let i in keys){
         if(savedData[keys[i]].isPlaying){
           savedData[keys[i]].isPlaying = false
@@ -139,6 +138,7 @@ function App() {
     for(let i in Object.keys(soundStates)){
       soundStates[Object.keys(soundStates)[i]].isPlaying = true
     }
+    localStorage.setItem("zenmix-state", JSON.stringify(soundStates))
   }
 
   return (
