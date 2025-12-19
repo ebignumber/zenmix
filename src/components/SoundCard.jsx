@@ -3,7 +3,14 @@ import * as Icons from "lucide-react";
 
 // Πλέον το SoundCard δεν έχει δικό του state.
 // Παίρνει εντολές (props) από το App.jsx.
-const SoundCard = ({ sound, isPlaying, volume, onToggle, onVolumeChange,isGloballyMuted }) => {
+const SoundCard = ({
+  sound,
+  isPlaying,
+  volume,
+  onToggle,
+  onVolumeChange,
+  isGloballyMuted,
+}) => {
   const audioRef = useRef(null);
   const IconComponent = Icons[sound.icon] || Icons.HelpCircle;
   const volumePercent = Math.round(volume * 100);
@@ -44,7 +51,8 @@ const SoundCard = ({ sound, isPlaying, volume, onToggle, onVolumeChange,isGlobal
 
   // This effect ensures the actual audio element reflects the global mute status
   useEffect(() => {
-    if (audioRef.current && isPlaying) { // Only affect currently playing sounds
+    if (audioRef.current && isPlaying) {
+      // Only affect currently playing sounds
       if (isGloballyMuted) {
         // Mute the volume immediately (set to 0)
         audioRef.current.volume = 0;
@@ -57,35 +65,29 @@ const SoundCard = ({ sound, isPlaying, volume, onToggle, onVolumeChange,isGlobal
 
   return (
     <div
-      title={`Volume: ${volumePercent}%`}
-      className={`
-        relative p-6 rounded-2xl transition-all duration-300 border border-transparent hover:-translate-y-2
-        ${
-          isPlaying
-            ? `${sound.color} shadow-lg scale-105`
-            : "bg-gray-800 hover:bg-gray-700"
-        }
-      `}
+      title={`Volume ${volumePercent}`}
+      className={`p-6 rounded-2xl duration-300 border border-transparent hover:-translate-y-2 flex flex-col justify-center items-center gap-5 ${
+        isPlaying
+          ? `${sound.color} shadow-lg scale-105`
+          : "bg-gray-800 hover:bg-gray-700"
+      }`}
     >
-      <div className="flex flex-col items-center gap-4">
-        <button
-          onClick={() => onToggle(sound.id)} // Καλούμε τη συνάρτηση του App
-          className="p-4 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
-        >
-          <IconComponent
-            size={48}
-            className={isPlaying ? "text-white" : "text-gray-400"}
-          />
-        </button>
+      <button
+        onClick={() => onToggle(sound.id)} // Καλούμε τη συνάρτηση του App
+        className="p-4 rounded-full bg-white/10 hover:bg-white/20 transition-colors"
+      >
+        <IconComponent
+          size={48}
+          className={isPlaying ? "text-white" : "text-gray-400"}
+        />
+      </button>
 
-        <h3 className="text-white font-medium text-lg">{sound.label}</h3>
+      <h3 className="text-white font-medium text-center md:text-lg">
+        {sound.label}
+      </h3>
 
-        <div
-          className={`
-          w-full transition-opacity duration-300 
-          ${isPlaying ? "opacity-100" : "opacity-0 pointer-events-none"}
-        `}
-        >
+      {isPlaying && (
+        <div className="w-full">
           <input
             type="range"
             min="0"
@@ -96,11 +98,24 @@ const SoundCard = ({ sound, isPlaying, volume, onToggle, onVolumeChange,isGlobal
               onVolumeChange(sound.id, parseFloat(e.target.value))
             }
             disabled={isGloballyMuted}
-            className={`w-full h-2 bg-gray-600 rounded-lg appearance-none cursor-pointer
+            className={`
+            w-full h-1 
+                bg-gray-600 rounded-lg 
+                appearance-none cursor-pointer 
+                accent-white
+                
+                /* Custom thumb styling using arbitrary variants for cross-browser support */
+                [&::-webkit-slider-thumb]:w-4 
+                [&::-webkit-slider-thumb]:h-4 
+                [&::-webkit-slider-thumb]:bg-white 
+                [&::-webkit-slider-thumb]:rounded-full 
+                [&::-webkit-slider-thumb]:appearance-none 
+                [&::-webkit-slider-thumb]:mt-[-0.15rem] /* Adjust vertical position */
+                [&::-webkit-slider-thumb]:shadow-lg
         ${isGloballyMuted ? "opacity-50 accent-gray-400" : "accent-white"}`}
           />
         </div>
-      </div>
+      )}
     </div>
   );
 };
