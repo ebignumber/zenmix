@@ -19,6 +19,35 @@ function App() {
 
   // STATE: holds play status and volume for each sound
   const [soundStates, setSoundStates] = useState(() => {
+
+    // Checks url for a mix to start
+    if(window.location.search && window.location.search.includes('mix=')){
+      const urlRequest = window.location.search.slice(5)
+      let object = {}
+      try{
+        const requests = urlRequest.split(',')
+        for (let i in requests){
+          object[requests[i].slice(0, requests[i].indexOf(':'))] = {isPlaying : false, volume : Number(requests[i].slice(requests[i].indexOf(':') + 1))}
+          const soundState = object[requests[i].slice(0, requests[i].indexOf(':'))]
+          if(soundState.volume > 1 || !sounds.find(sound => sound.id == requests[i].slice(0, requests[i].indexOf(':')))){
+            object = {}
+            break
+          }
+        }
+      }
+      catch{
+        console.warn("A search was requested but it failed")
+        return
+      }
+     setHasSaveData(true)
+     if(JSON.stringify(object) != "{}"){
+       return object
+      }
+     else{
+       console.log('The URL request was invalid')
+     }
+    }
+
     const saved = localStorage.getItem("zenmix-state");
 
     //modifies the saved object from localStorage
@@ -142,6 +171,17 @@ function App() {
       localStorage.setItem("zenmix-state", JSON.stringify(updatedStates));
       return updatedStates;
     });
+  }
+
+  function shareMix(){
+    let mixString = ''
+    const keys = Object.keys(soundStates)
+    for(let i in keys){
+      if(soundStates[keys[i]].isPlaying){
+        mixString += `,${keys[i]}:${soundStates[keys[i]].volume}`
+      }
+    }
+    window.location.assign(`${window.location.protocol}//${window.location.host}/?mix=${mixString.slice(1, mixString.length)}`)
   }
 
   return (
@@ -291,6 +331,10 @@ function App() {
               isOpen={isHelpOpen}
               onClose={() => setIsHelpOpen(false)}
             />
+            {/* Share Button */}
+            <button onClick={shareMix}>
+              Share
+            </button>
           </div>
         </header>
 
