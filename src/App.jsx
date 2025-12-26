@@ -21,11 +21,12 @@ function App() {
   const [soundStates, setSoundStates] = useState(() => {
 
     // Checks url for a mix to start
-    if(window.location.search && window.location.search.includes('mix=')){
-      const urlRequest = window.location.search.slice(5)
+    const params = new URLSearchParams(window.location.search)
+    const mixParam = params.get('mix');
+    if(mixParam){
       let object = {}
       try{
-        const requests = urlRequest.split(',')
+        const requests = mixParam.split(',')
         for (let i in requests){
           object[requests[i].slice(0, requests[i].indexOf(':'))] = {isPlaying : false, volume : Number(requests[i].slice(requests[i].indexOf(':') + 1))}
           const soundState = object[requests[i].slice(0, requests[i].indexOf(':'))]
@@ -39,7 +40,6 @@ function App() {
         console.warn("A search was requested but it failed")
         return
       }
-     setHasSaveData(true)
      if(JSON.stringify(object) != "{}"){
        return object
       }
@@ -52,7 +52,6 @@ function App() {
 
     //modifies the saved object from localStorage
     function modifyLastSave() {
-      saved.includes("true") ? setHasSaveData(true) : setHasSaveData(false);
       const savedData = JSON.parse(saved);
       const keys = Object.keys(savedData);
       for (let i in keys) {
@@ -71,6 +70,12 @@ function App() {
   useEffect(() => {
     localStorage.setItem("zenmix-state", JSON.stringify(soundStates));
   }, [soundStates]);
+
+  useEffect(() => {
+      if(JSON.stringify(soundStates != "{}")){
+         setHasSaveData(true)
+      }
+  }, []);
 
   const {
     activeSounds,
@@ -173,16 +178,21 @@ function App() {
     });
   }
 
-  function shareMix(){
-    let mixString = ''
-    const keys = Object.keys(soundStates)
-    for(let i in keys){
-      if(soundStates[keys[i]].isPlaying){
-        mixString += `,${keys[i]}:${soundStates[keys[i]].volume}`
-      }
-    }
-    window.location.assign(`${window.location.protocol}//${window.location.host}/?mix=${mixString.slice(1, mixString.length)}`)
-  }
+const shareMix = () => {
+  const activeIds = Object.keys(soundStates).filter(id => soundStates[id].isPlaying);
+  if (activeIds.length === 0) return;
+
+  const mixString = activeIds
+    .map(id => `${id}:${soundStates[id].volume}`)
+    .join(',');
+    
+  const url = `${window.location.origin}/?mix=${mixString}`;
+  
+  navigator.clipboard.writeText(url).then(() => {
+    console.log('Copied to clipboard');
+    alert('Link copied!')
+  });
+};
 
   return (
     <>
@@ -332,7 +342,11 @@ function App() {
               onClose={() => setIsHelpOpen(false)}
             />
             {/* Share Button */}
-            <button onClick={shareMix}>
+            <button onClick={shareMix} className={`p-2.5 rounded-full transition-colors duration-300 ${
+              theme === "dark"
+                ? "bg-white/10 hover:bg-white/20"
+                : "bg-stone-700/10 hover:bg-stone-700/20"
+              }`}>
               Share
             </button>
           </div>
