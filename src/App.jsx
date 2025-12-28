@@ -4,7 +4,7 @@ import PresetSelector from "./components/PresetSelector";
 import { useSounds } from "./hooks/useSounds";
 import { useActiveSounds } from "./hooks/useActiveSounds";
 import { useTheme } from "./context/ThemeContext";
-import { X, Play, Sun, Moon, HelpCircle, CircleHelp, Check } from "lucide-react";
+import { X, Play, Sun, Moon, HelpCircle, CircleHelp, Check, Share, Sparkles } from "lucide-react";
 import { Volume2, VolumeX } from "lucide-react";
 import HelpModal from "./components/HelpModal";
 
@@ -12,8 +12,9 @@ function App() {
   const { sounds } = useSounds();
   const { theme, toggleTheme } = useTheme();
   
-  const [hasSaveData, setHasSaveData] = useState(false);
-  const [showToast, setShowToast] = useState(false);
+  const [showResumeBanner, setShowResumeBanner] = useState(false);
+  const [showPlayBanner, setShowPlayBanner] = useState(false);
+  const [showSharedToast, setShowSharedToast] = useState(false);
   const [hasResponded, setHasResponded] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [isHelpOpen, setIsHelpOpen] = useState(false);
@@ -73,9 +74,16 @@ function App() {
   }, [soundStates]);
 
   useEffect(() => {
-      if(JSON.stringify(soundStates != "{}")){
-         setHasSaveData(true)
-      }
+    const params = new URLSearchParams(window.location.search)
+    const mixParam = params.get('mix');
+    if(mixParam){
+        setShowPlayBanner(true)
+        return
+    }
+ 
+    if (soundStates && Object.keys(soundStates).length > 0) {
+      setShowResumeBanner(true);
+    }
   }, []);
 
   const {
@@ -191,15 +199,15 @@ const shareMix = () => {
   
   navigator.clipboard.writeText(url).then(() => {
     console.log('Copied to clipboard');
-    setShowToast(true)
+    setShowSharedToast(true)
     setTimeout(() => {setShowToast(false)}, 1750)
   });
 };
 
   return (
     <>
-      {/* Banner For Saved Data */}
-      {hasSaveData && !hasResponded && (
+      {/* Banner For Resuming Mix From Local Storage */}
+      {showResumeBanner && !hasResponded && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
           <div
             className={`flex items-center gap-4 pl-6 pr-4 py-3 
@@ -261,8 +269,70 @@ const shareMix = () => {
         </div>
       )}
 
+      { /* Banner For Playing A Mix From URL */ }
+      {showPlayBanner && !hasResponded && (
+        <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-in slide-in-from-bottom-10 fade-in duration-500">
+          <div
+            className={`flex items-center gap-4 pl-6 pr-4 py-3 
+              backdrop-blur-md border rounded-full shadow-lg ring-1
+              ${theme === 'dark' 
+                ? 'bg-gray-800/95 border-purple-500/30 ring-white/10 text-gray-100' 
+                : 'bg-white/95 border-purple-400/30 ring-black/5 text-stone-800'}
+              }`}
+          >
+            <div className="flex items-center gap-3">
+              <div
+                className={`flex items-center justify-center w-6 h-6 rounded-full 
+                ${
+                  theme === "dark"
+                    ? "bg-purple-500/20 text-purple-400"
+                    : "bg-purple-400/20 text-purple-600"
+                }`}
+              >
+                <Sparkles size={12} fill="currentColor" />
+              </div>
+              <span
+                className={`text-sm font-medium ${
+                  theme === "dark" ? "text-gray-100" : "text-gray-800"
+                }`}
+              >
+                Shared mix loaded
+              </span>
+            </div>
+
+            <div
+              className={`h-4 w-px ${
+                theme === "dark" ? "bg-white/10" : "bg-gray-300"
+              }`}
+            />
+
+            <button
+              onClick={handleResume}
+              className={`text-sm font-bold transition-colors ${
+                theme === "dark"
+                  ? "text-purple-400 hover:text-purple-300"
+                  : "text-purple-600 hover:text-purple-700"
+              }`}
+            >
+              Play
+            </button>
+
+            <button
+              onClick={() => setHasResponded(true)}
+              className={`p-1 ml-1 rounded-full transition-all ${
+                theme === "dark"
+                  ? "text-gray-500 hover:text-white hover:bg-white/10"
+                  : "text-gray-400 hover:text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              <X size={16} />
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* TOAST FOR SAVING SHARING MIX */}
-      {showToast && (
+      {showSharedToast && (
         <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-[60] animate-in slide-in-from-bottom-5 fade-in duration-300">
           <div className={`
             flex items-center gap-3 px-5 py-2.5 rounded-full shadow-xl ring-1 backdrop-blur-md border
@@ -369,7 +439,7 @@ const shareMix = () => {
                 ? "bg-white/10 hover:bg-white/20"
                 : "bg-stone-700/10 hover:bg-stone-700/20"
               }`}>
-              Share
+              <Share/>
             </button>
           </div>
         </header>
